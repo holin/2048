@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:math' show Random;
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:hardik_2048/model/snapshots.dart';
 import 'package:hardik_2048/model/snapshot.dart';
 
@@ -319,7 +322,15 @@ class GameController extends GetxController {
         }
       }
     } else {
-      print("no more undo step!!");
+      Fluttertoast.showToast(
+        msg: "No more undo steps!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: const Color.fromARGB(255, 255, 103, 92),
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
     }
   }
 
