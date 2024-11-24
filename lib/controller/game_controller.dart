@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' show Random;
 
 import 'package:get/get.dart';
+import 'package:hardik_2048/model/snapshots.dart';
 import 'package:hardik_2048/model/snapshot.dart';
 
 import '../model/boardcell.dart';
@@ -17,7 +18,7 @@ class GameController extends GetxController {
   var isGameWon = false.obs;
 
   late DataManager dataManager;
-  late Snapshot snapshot;
+  late Snapshots snapshots;
   final reactiveBoardCells = <RxList<Rx<BoardCell>>>[].obs;
   final list = <Rx<BoardCell>>[].obs;
 
@@ -38,7 +39,7 @@ class GameController extends GetxController {
     numberOfMoves.value = 0;
     timer.value = '0';
 
-    snapshot = Snapshot();
+    snapshots = Snapshots();
     _initialiseDataManager();
     _initialiseBoard();
     _resetMergeStatus();
@@ -47,7 +48,7 @@ class GameController extends GetxController {
   }
 
   void _saveSnapShot() {
-    snapshot.saveGameState(
+    snapshots.saveGameState(
       score.value,
       highScore.value,
       numberOfMoves.value,
@@ -60,10 +61,10 @@ class GameController extends GetxController {
   }
 
   void moveLeft() {
-    _saveSnapShot();
     if (!canMoveLeft()) {
       return;
     }
+    _saveSnapShot();
     _incrementNumberOfMoves();
     for (int r = 0; r < row; ++r) {
       for (int c = 0; c < column; ++c) {
@@ -75,10 +76,10 @@ class GameController extends GetxController {
   }
 
   void moveRight() {
-    _saveSnapShot();
     if (!canMoveRight()) {
       return;
     }
+    _saveSnapShot();
     _incrementNumberOfMoves();
     for (int r = 0; r < row; ++r) {
       for (int c = column - 2; c >= 0; --c) {
@@ -90,10 +91,10 @@ class GameController extends GetxController {
   }
 
   void moveUp() {
-    _saveSnapShot();
     if (!canMoveUp()) {
       return;
     }
+    _saveSnapShot();
     _incrementNumberOfMoves();
     for (int r = 0; r < row; ++r) {
       for (int c = 0; c < column; ++c) {
@@ -105,10 +106,10 @@ class GameController extends GetxController {
   }
 
   void moveDown() {
-    _saveSnapShot();
     if (!canMoveDown()) {
       return;
     }
+    _saveSnapShot();
     _incrementNumberOfMoves();
     for (int r = row - 2; r >= 0; --r) {
       for (int c = 0; c < column; ++c) {
@@ -294,14 +295,15 @@ class GameController extends GetxController {
   }
 
   void undo() {
-    var previousState = snapshot.revertState();
+    print("undo step!!");
+    var previousState = snapshots.revertState();
     score.value = previousState[SnapshotKeys.SCORE] as int;
     highScore.value = previousState[SnapshotKeys.HIGH_SCORE] as int;
     numberOfMoves.value = previousState[SnapshotKeys.NUMBER_OF_MOVES] as int;
     isGameOver.value = false;
     isGameWon.value = false;
     var cells = previousState[SnapshotKeys.BOARD];
-    if (cells != null && cells is List<List<BoardCell>>) {
+    if (cells != null && cells is List<List<BoardCell>> && cells.isNotEmpty) {
       reactiveBoardCells.clear();
       for (int r = 0; r < row; r++) {
         reactiveBoardCells.add(<Rx<BoardCell>>[].obs);
@@ -316,6 +318,8 @@ class GameController extends GetxController {
           reactiveBoardCells.refresh();
         }
       }
+    } else {
+      print("no more undo step!!");
     }
   }
 

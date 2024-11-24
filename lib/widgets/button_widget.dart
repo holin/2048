@@ -30,9 +30,9 @@ class ButtonWidget extends StatelessWidget {
     //Button Widget with text for New Game and Try Again button.
     return ElevatedButton(
         style: ButtonStyle(
-            padding: MaterialStateProperty.all<EdgeInsets>(
+            padding: WidgetStateProperty.all<EdgeInsets>(
                 const EdgeInsets.all(16.0)),
-            backgroundColor: MaterialStateProperty.all<Color>(color256)),
+            backgroundColor: WidgetStateProperty.all<Color>(color256)),
         onPressed: onPressed,
         child: Text(
           text!,
