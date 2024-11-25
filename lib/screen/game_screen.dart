@@ -66,6 +66,7 @@ class GameScreen extends GetView<GameController> {
                             onUndoPressed: () {
                               _animationController.stop();
                               controller.undo();
+                              showAlertDialog(context);
                             },
                             onNewGamePressed: () {
                               _animationController.stop();
@@ -87,6 +88,41 @@ class GameScreen extends GetView<GameController> {
             )
           ],
         ));
+  }
+
+  showAlertDialog(BuildContext context) {
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: Text("Cancel"),
+      onPressed: () {
+        Get.back();
+      },
+    );
+    Widget continueButton = TextButton(
+      child: Text("Continue"),
+      onPressed: () {
+        Get.back();
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("AlertDialog"),
+      content: Text(
+          "Would you like to continue learning how to use Flutter alerts?"),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   void onSwipedDetected(SwipeDirection direction) {
