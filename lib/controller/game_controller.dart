@@ -337,7 +337,9 @@ class GameController extends GetxController {
   Future<void> _initialiseDataManager() async {
     dataManager = DataManager();
     var result = await dataManager.getValue(StorageKeys.highScore); // as int;
-    highScore.value = int.parse(result);
+    if (result != null) {
+      highScore.value = int.parse(result);
+    }
   }
 
   void setHighScore() {

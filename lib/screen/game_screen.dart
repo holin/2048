@@ -33,10 +33,10 @@ class GameScreen extends GetView<GameController> {
       commentWidgets.clear();
     }
 
-    return RawKeyboardListener(
+    return KeyboardListener(
         autofocus: true,
         focusNode: FocusNode(),
-        onKey: (event) {
+        onKeyEvent: (event) {
           handleKeyEvent(event);
         },
         child: Column(
@@ -107,7 +107,7 @@ class GameScreen extends GetView<GameController> {
     }
   }
 
-  void handleKeyEvent(RawKeyEvent event) {
+  void handleKeyEvent(KeyEvent _) {
     var currentKeyStrokeTime = DateTime.now().millisecondsSinceEpoch;
     if (currentKeyStrokeTime - lastKeyStrokeTime < 5) {
       lastKeyStrokeTime = currentKeyStrokeTime;
@@ -115,13 +115,17 @@ class GameScreen extends GetView<GameController> {
     }
     lastKeyStrokeTime = currentKeyStrokeTime;
     SwipeDirection? direction;
-    if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
+    if (HardwareKeyboard.instance
+        .isPhysicalKeyPressed(PhysicalKeyboardKey.arrowUp)) {
       direction = SwipeDirection.up;
-    } else if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
+    } else if (HardwareKeyboard.instance
+        .isPhysicalKeyPressed(PhysicalKeyboardKey.arrowDown)) {
       direction = SwipeDirection.down;
-    } else if (event.isKeyPressed(LogicalKeyboardKey.arrowLeft)) {
+    } else if (HardwareKeyboard.instance
+        .isPhysicalKeyPressed(PhysicalKeyboardKey.arrowLeft)) {
       direction = SwipeDirection.left;
-    } else if (event.isKeyPressed(LogicalKeyboardKey.arrowRight)) {
+    } else if (HardwareKeyboard.instance
+        .isPhysicalKeyPressed(PhysicalKeyboardKey.arrowRight)) {
       direction = SwipeDirection.right;
     }
     if (direction != null) {
