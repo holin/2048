@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_swipe_detector/flutter_swipe_detector.dart';
 import 'package:get/get.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../controller/game_controller.dart';
 import '../widgets/board_widget.dart';
@@ -14,6 +17,8 @@ import '../widgets/score_board_widget.dart';
 class GameScreen extends GetView<GameController> {
   late ConfettiController _animationController;
   int lastKeyStrokeTime = 0;
+
+  late Pazzle pazzle;
 
   GameScreen({Key? key}) : super(key: key) {
     _animationController =
@@ -65,7 +70,6 @@ class GameScreen extends GetView<GameController> {
                       Obx(() => (GameActionableWidget(
                             onUndoPressed: () {
                               _animationController.stop();
-                              controller.undo();
                               showAlertDialog(context);
                             },
                             onNewGamePressed: () {
@@ -90,26 +94,106 @@ class GameScreen extends GetView<GameController> {
         ));
   }
 
+  checkAnswer(String value) {
+    if (pazzle.check(int.parse(value))) {
+      controller.undo();
+      Get.back();
+    } else {
+      Fluttertoast.showToast(
+        msg: "答案错误！",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: const Color.fromARGB(255, 255, 103, 92),
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+  }
+
   showAlertDialog(BuildContext context) {
+    var textFieldController = TextEditingController();
+    Random random = new Random();
+    pazzle = new Pazzle(random.nextInt(20) + 1, random.nextInt(20) + 2, 0);
+
     // set up the buttons
     Widget cancelButton = TextButton(
-      child: const Text("Cancel"),
+      child: const Text("取消"),
       onPressed: () {
         Get.back();
       },
     );
     Widget continueButton = TextButton(
-      child: const Text("Continue"),
+      child: const Text("确定"),
       onPressed: () {
-        Get.back();
+        checkAnswer(textFieldController.text);
       },
     );
 
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: const Text("AlertDialog"),
-      content: const Text(
-          "Would you like to continue learning how to use Flutter alerts?"),
+      title: const Text(
+        "请先回答对问题才能反悔一步 ^_^",
+        style: TextStyle(
+          fontSize: 14,
+        ),
+      ),
+      content: Row(
+        children: [
+          Text(
+            pazzle.x.toString(),
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            "+",
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            pazzle.y.toString(),
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            "=",
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Expanded(
+            child: TextField(
+              textAlign: TextAlign.center,
+              controller: textFieldController,
+              keyboardType:
+                  TextInputType.numberWithOptions(decimal: true, signed: false),
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: "答案是？",
+                hintStyle: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w300,
+                ),
+              ),
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+              ),
+              onSubmitted: (value) {
+                checkAnswer(value);
+              },
+            ),
+          ),
+        ],
+      ),
       actions: [
         cancelButton,
         continueButton,
@@ -167,5 +251,17 @@ class GameScreen extends GetView<GameController> {
     if (direction != null) {
       onSwipedDetected(direction);
     }
+  }
+}
+
+class Pazzle {
+  int x = 0;
+  int y = 0;
+  int value = 0;
+
+  Pazzle(this.x, this.y, this.value);
+
+  bool check(int value) {
+    return this.x + this.y == value;
   }
 }

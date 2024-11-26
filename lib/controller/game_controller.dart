@@ -329,8 +329,8 @@ class GameController extends GetxController {
         timeInSecForIosWeb: 1,
         backgroundColor: const Color.fromARGB(255, 255, 103, 92),
         textColor: Colors.white,
-        fontSize: 16.0
-    );
+        fontSize: 16.0,
+      );
     }
   }
 
