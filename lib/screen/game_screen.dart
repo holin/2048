@@ -93,13 +93,13 @@ class GameScreen extends GetView<GameController> {
   showAlertDialog(BuildContext context) {
     // set up the buttons
     Widget cancelButton = TextButton(
-      child: Text("Cancel"),
+      child: const Text("Cancel"),
       onPressed: () {
         Get.back();
       },
     );
     Widget continueButton = TextButton(
-      child: Text("Continue"),
+      child: const Text("Continue"),
       onPressed: () {
         Get.back();
       },
@@ -107,8 +107,8 @@ class GameScreen extends GetView<GameController> {
 
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: Text("AlertDialog"),
-      content: Text(
+      title: const Text("AlertDialog"),
+      content: const Text(
           "Would you like to continue learning how to use Flutter alerts?"),
       actions: [
         cancelButton,
