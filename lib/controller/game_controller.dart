@@ -340,10 +340,8 @@ class GameController extends GetxController {
   }
 
   void undo() {
-    print("undo step!!");
     var previousState = snapshots.revertState();
     var cells = previousState[SnapshotKeys.BOARD];
-    debugger();
     if (snapshots.length > 0 &&
         cells != null &&
         cells is List<List<BoardCell>> &&
