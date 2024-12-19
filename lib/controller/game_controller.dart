@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:developer';
 import 'dart:math' show Random;
 
 import 'package:flutter/material.dart';
@@ -36,14 +38,25 @@ class GameController extends GetxController {
     super.onInit();
   }
 
-  void init() {
+  void init() async {
     isGameWon.value = isGameOver.value = false;
     score.value = 0;
     numberOfMoves.value = 0;
     timer.value = '0';
 
     snapshots = Snapshots();
-    _initialiseDataManager();
+    _initialiseBoard();
+    _resetMergeStatus();
+    await _initialiseDataManager();
+  }
+
+  void refresh() async {
+    isGameWon.value = isGameOver.value = false;
+    score.value = 0;
+    numberOfMoves.value = 0;
+    timer.value = '0';
+
+    snapshots = Snapshots();
     _initialiseBoard();
     _resetMergeStatus();
     _randomEmptyCell(2);
@@ -57,6 +70,10 @@ class GameController extends GetxController {
       numberOfMoves.value,
       reactiveBoardCells,
     );
+
+    print("snapshots.toString() ${snapshots.toString()}");
+
+    dataManager.setValue(StorageKeys.snapshots, snapshots.toString());
   }
 
   void _incrementNumberOfMoves() {
@@ -67,7 +84,6 @@ class GameController extends GetxController {
     if (!canMoveLeft()) {
       return;
     }
-    _saveSnapShot();
     _incrementNumberOfMoves();
     for (int r = 0; r < row; ++r) {
       for (int c = 0; c < column; ++c) {
@@ -76,13 +92,13 @@ class GameController extends GetxController {
     }
     _resetMergeStatus();
     _randomEmptyCell(1);
+    _saveSnapShot();
   }
 
   void moveRight() {
     if (!canMoveRight()) {
       return;
     }
-    _saveSnapShot();
     _incrementNumberOfMoves();
     for (int r = 0; r < row; ++r) {
       for (int c = column - 2; c >= 0; --c) {
@@ -91,13 +107,13 @@ class GameController extends GetxController {
     }
     _resetMergeStatus();
     _randomEmptyCell(1);
+    _saveSnapShot();
   }
 
   void moveUp() {
     if (!canMoveUp()) {
       return;
     }
-    _saveSnapShot();
     _incrementNumberOfMoves();
     for (int r = 0; r < row; ++r) {
       for (int c = 0; c < column; ++c) {
@@ -106,13 +122,13 @@ class GameController extends GetxController {
     }
     _resetMergeStatus();
     _randomEmptyCell(1);
+    _saveSnapShot();
   }
 
   void moveDown() {
     if (!canMoveDown()) {
       return;
     }
-    _saveSnapShot();
     _incrementNumberOfMoves();
     for (int r = row - 2; r >= 0; --r) {
       for (int c = 0; c < column; ++c) {
@@ -121,6 +137,7 @@ class GameController extends GetxController {
     }
     _resetMergeStatus();
     _randomEmptyCell(1);
+    _saveSnapShot();
   }
 
   bool canMoveLeft() {
@@ -294,18 +311,16 @@ class GameController extends GetxController {
     _resetMergeStatus();
     score.value = 0;
     resetTimer();
-    init();
+    refresh();
   }
 
-  void undo() {
-    print("undo step!!");
-    var previousState = snapshots.revertState();
-    score.value = previousState[SnapshotKeys.SCORE] as int;
-    highScore.value = previousState[SnapshotKeys.HIGH_SCORE] as int;
-    numberOfMoves.value = previousState[SnapshotKeys.NUMBER_OF_MOVES] as int;
+  void renderWithState(Map<String, Object> state) {
+    score.value = state[SnapshotKeys.SCORE] as int;
+    highScore.value = state[SnapshotKeys.HIGH_SCORE] as int;
+    numberOfMoves.value = state[SnapshotKeys.NUMBER_OF_MOVES] as int;
     isGameOver.value = false;
     isGameWon.value = false;
-    var cells = previousState[SnapshotKeys.BOARD];
+    var cells = state[SnapshotKeys.BOARD];
     if (cells != null && cells is List<List<BoardCell>> && cells.isNotEmpty) {
       reactiveBoardCells.clear();
       for (int r = 0; r < row; r++) {
@@ -321,16 +336,22 @@ class GameController extends GetxController {
           reactiveBoardCells.refresh();
         }
       }
+    }
+  }
+
+  void undo() {
+    print("undo step!!");
+    var previousState = snapshots.revertState();
+    var cells = previousState[SnapshotKeys.BOARD];
+    debugger();
+    if (snapshots.length > 0 &&
+        cells != null &&
+        cells is List<List<BoardCell>> &&
+        cells.isNotEmpty) {
+      renderWithState(previousState);
+      _saveSnapShot();
     } else {
-      Fluttertoast.showToast(
-        msg: "No more undo steps!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 1,
-        backgroundColor: const Color.fromARGB(255, 255, 103, 92),
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      print("No more undo steps!");
     }
   }
 
@@ -340,6 +361,46 @@ class GameController extends GetxController {
     if (result != null) {
       highScore.value = int.parse(result);
     }
+
+    var savedSnapshotsJson = await dataManager.getValue(StorageKeys.snapshots);
+    var savedSnapshots = jsonDecode(savedSnapshotsJson);
+    if (savedSnapshots != null && (savedSnapshots is List)) {
+      for (var i = savedSnapshots.length - 1; i >= 0; i--) {
+        var _snapshot = savedSnapshots[i];
+
+        snapshots.saveGameState(
+          _snapshot['score'],
+          _snapshot['high_score'],
+          _snapshot['number_of_moves'],
+          boardCellsFromJson(_snapshot['board']),
+        );
+      }
+
+      renderWithState(snapshots.first.revertState());
+    } else {
+      _randomEmptyCell(2);
+      _saveSnapShot();
+    }
+  }
+
+  RxList<RxList<Rx<BoardCell>>> boardCellsFromJson(String json) {
+    print("boardCells json $json");
+    var boardCells = jsonDecode(json);
+    var cells = <RxList<Rx<BoardCell>>>[];
+    for (int r = 0; r < row; r++) {
+      cells.add(<Rx<BoardCell>>[].obs);
+      for (int c = 0; c < column; c++) {
+        var cell = BoardCell(
+          row: r,
+          column: c,
+          number: boardCells[r][c]['number'],
+          isNew: boardCells[r][c]['isNew'],
+        );
+        cells[r].add(cell.obs);
+      }
+    }
+
+    return cells.obs;
   }
 
   void setHighScore() {

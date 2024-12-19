@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 
@@ -13,12 +15,16 @@ class Stack<E> {
   E pop() => _list.removeLast();
 
   E get peek => _list.last;
+  E get first => _list.first;
+  int get length => _list.length;
 
   bool get isEmpty => _list.isEmpty;
   bool get isNotEmpty => _list.isNotEmpty;
 
   @override
-  String toString() => _list.toString();
+  String toString() {
+    return _list.toString();
+  }
 }
 
 class Snapshots {
@@ -30,20 +36,31 @@ class Snapshots {
 
   void clear() {
     _snapshots.clear();
-  } 
+  }
 
-  Snapshot pop() { 
+  int get length => _snapshots.length;
+
+  Snapshot pop() {
     return _snapshots.pop();
   }
 
-  void saveGameState(
-      int score, int highScore, int numberOfMoves, RxList<RxList<Rx<BoardCell>>> boardCells) {
+  Snapshot get first {
+    return _snapshots.first;
+  }
+
+  @override
+  String toString() {
+    return _snapshots.toString();
+  }
+
+  void saveGameState(int score, int highScore, int numberOfMoves,
+      RxList<RxList<Rx<BoardCell>>> boardCells) {
     if (!isAnyCellEmpty(boardCells)) {
       return;
     }
 
     Snapshot snapshot = Snapshot();
-    snapshot.saveGameState(score, highScore, numberOfMoves, boardCells); 
+    snapshot.saveGameState(score, highScore, numberOfMoves, boardCells);
     push(snapshot);
   }
 
@@ -51,10 +68,9 @@ class Snapshots {
     if (_snapshots.isEmpty) {
       return Snapshot().revertState();
     }
-    var snapshot = pop(); 
+    var snapshot = pop();
     return snapshot.revertState();
   }
-
 
   bool isAnyCellEmpty(RxList<RxList<Rx<BoardCell>>> boardCells) {
     List<BoardCell> emptyCells = <BoardCell>[];
@@ -69,6 +85,5 @@ class Snapshots {
     }
 
     return false;
-  } 
+  }
 }
- 

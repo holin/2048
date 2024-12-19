@@ -28,4 +28,14 @@ class BoardCell {
   String toString() {
     return "$number row $row column $column";
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "row": row,
+      "column": column,
+      "number": number,
+      "isMerged": isMerged,
+      "isNew": isNew,
+    };
+  }
 }

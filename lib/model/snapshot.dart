@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 
@@ -9,8 +11,19 @@ class Snapshot {
   int _numberOfMoves = 0;
   var cells = <List<BoardCell>>[];
 
-  void saveGameState(
-      int score, int highScore, int numberOfMoves, RxList<RxList<Rx<BoardCell>>> boardCells) {
+  @override
+  String toString() {
+    return jsonEncode({
+      SnapshotKeys.SCORE: _score,
+      SnapshotKeys.HIGH_SCORE: _highScore,
+      SnapshotKeys.BOARD:
+          "[${cells.map((cell) => jsonEncode(cell)).join(",")}]",
+      SnapshotKeys.NUMBER_OF_MOVES: _numberOfMoves
+    });
+  }
+
+  void saveGameState(int score, int highScore, int numberOfMoves,
+      RxList<RxList<Rx<BoardCell>>> boardCells) {
     if (!isAnyCellEmpty(boardCells)) {
       return;
     }
@@ -59,9 +72,9 @@ class Snapshot {
   void clearList() {
     cells = List.generate(
         4,
-            (row) => List.generate(
+        (row) => List.generate(
             4,
-                (column) =>
+            (column) =>
                 BoardCell(row: row, column: column, number: 0, isNew: false)));
   }
 
@@ -69,14 +82,19 @@ class Snapshot {
     _printBoard(cells);
   }
 
-
   void _printBoard(List<List<BoardCell>> boardCells) {
     try {
-      print("### snapshot ------------");
-      print("${cells[0][0].number} ${cells[0][1].number} ${cells[0][2].number} ${cells[0][3].number}");
-      print("${cells[1][0].number} ${cells[1][1].number} ${cells[1][2].number} ${cells[1][3].number}");
-      print("${cells[2][0].number} ${cells[2][1].number} ${cells[2][2].number} ${cells[2][3].number}");
-      print("${cells[3][0].number} ${cells[3][1].number} ${cells[3][2].number} ${cells[3][3].number}");
+      print("### _printBoard snapshot ------------");
+      print(
+          "${cells[0][0].number} ${cells[0][1].number} ${cells[0][2].number} ${cells[0][3].number}");
+      print(
+          "${cells[1][0].number} ${cells[1][1].number} ${cells[1][2].number} ${cells[1][3].number}");
+      print(
+          "${cells[2][0].number} ${cells[2][1].number} ${cells[2][2].number} ${cells[2][3].number}");
+      print(
+          "${cells[3][0].number} ${cells[3][1].number} ${cells[3][2].number} ${cells[3][3].number}");
+      print("### end snapshot ------------");
+      print("");
     } catch (e) {
       print(e);
     }
