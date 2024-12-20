@@ -71,8 +71,6 @@ class GameController extends GetxController {
       reactiveBoardCells,
     );
 
-    print("snapshots.toString() ${snapshots.toString()}");
-
     dataManager.setValue(StorageKeys.snapshots, snapshots.toString());
   }
 
@@ -342,10 +340,11 @@ class GameController extends GetxController {
   void undo() {
     var previousState = snapshots.revertState();
     var cells = previousState[SnapshotKeys.BOARD];
-    if (snapshots.length > 0 &&
+    if (snapshots.length >= 0 &&
         cells != null &&
         cells is List<List<BoardCell>> &&
         cells.isNotEmpty) {
+      print("undo steps!");
       renderWithState(previousState);
       _saveSnapShot();
     } else {

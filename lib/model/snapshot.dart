@@ -40,6 +40,7 @@ class Snapshot {
       SnapshotKeys.BOARD: cells,
       SnapshotKeys.NUMBER_OF_MOVES: _numberOfMoves
     };
+    _printMe();
     return result;
   }
 

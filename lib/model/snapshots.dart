@@ -65,10 +65,12 @@ class Snapshots {
   }
 
   Map<String, Object> revertState() {
+    print("snapshots ${_snapshots.length}");
     if (_snapshots.isEmpty) {
       return Snapshot().revertState();
     }
     var snapshot = pop();
+    snapshot = pop();
     return snapshot.revertState();
   }
 
