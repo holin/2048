@@ -70,7 +70,9 @@ class Snapshots {
       return Snapshot().revertState();
     }
     var snapshot = pop();
-    snapshot = pop();
+    if (_snapshots.isNotEmpty) {
+      snapshot = pop();
+    }
     return snapshot.revertState();
   }
 

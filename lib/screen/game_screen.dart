@@ -17,6 +17,7 @@ import '../widgets/score_board_widget.dart';
 class GameScreen extends GetView<GameController> {
   late ConfettiController _animationController;
   int lastKeyStrokeTime = 0;
+  bool superUser = false;
 
   late Pazzle pazzle;
 
@@ -69,11 +70,16 @@ class GameScreen extends GetView<GameController> {
                       const SizedBox(height: 20),
                       Obx(() => (GameActionableWidget(
                             onUndoPressed: () {
+                              if (superUser) {
+                                controller.undo();
+                                return;
+                              }
                               _animationController.stop();
                               showAlertDialog(context);
                             },
                             onNewGamePressed: () {
                               _animationController.stop();
+                              superUser = false;
                               controller.reset();
                             },
                             score: controller.score.value,
@@ -95,6 +101,27 @@ class GameScreen extends GetView<GameController> {
   }
 
   checkAnswer(String value) {
+    if (superUser) {
+      controller.undo();
+      Get.back();
+      return;
+    }
+
+    if (int.parse(value) == 999) {
+      superUser = true;
+      Fluttertoast.showToast(
+        msg: "进入超级模式！！",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: const Color.fromARGB(255, 29, 176, 51),
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      Get.back();
+      return;
+    }
+
     if (pazzle.check(int.parse(value))) {
       controller.undo();
       Get.back();
