@@ -361,7 +361,10 @@ class GameController extends GetxController {
     }
 
     var savedSnapshotsJson = await dataManager.getValue(StorageKeys.snapshots);
-    var savedSnapshots = jsonDecode(savedSnapshotsJson);
+    var savedSnapshots = null;
+    if (savedSnapshotsJson != null) {
+      savedSnapshots = jsonDecode(savedSnapshotsJson);
+    }
     if (savedSnapshots != null && (savedSnapshots is List)) {
       for (var i = savedSnapshots.length - 1; i >= 0; i--) {
         var _snapshot = savedSnapshots[i];
